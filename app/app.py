@@ -254,7 +254,7 @@ with tab2:
 with tab3:
     st.subheader("Tu perfil musical personalizado")
 
-    # Selector de usuario dentro del tab
+    # Selector de usuario
     existing_users = rec.get_all_users()
     col_u1, col_u2 = st.columns([2, 3])
     with col_u1:
@@ -273,143 +273,142 @@ with tab3:
 
     if not username:
         st.info("Introduce un nombre de usuario o selecciona uno existente para empezar.")
-        st.stop()
+    else:
+        rec.get_or_create_user(username)
+        stats = rec.get_user_stats(username)
 
-    rec.get_or_create_user(username)
-    stats = rec.get_user_stats(username)
-
-    # Estadísticas rápidas
-    if stats["total_songs"] > 0:
-        m1, m2, m3, m4, m5 = st.columns(5)
-        m1.metric("🎵 Canciones", stats["total_songs"])
-        m2.metric("🏷️ Género favorito", stats.get("genero_favorito", "—"))
-        m3.metric("💃 Dance",  f"{stats.get('danceability_media', 0):.2f}")
-        m4.metric("⚡ Energy", f"{stats.get('energy_media', 0):.2f}")
-        m5.metric("😊 Mood",   f"{stats.get('valence_media', 0):.2f}")
-    st.divider()
-
-    result       = rec.recommend(username)
-    last_songs   = result["last_songs"]
-    recs_main    = result["recommendations_main"]
-    recs_sec     = result["recommendations_secondary"]
-
-    col_left3, col_right3 = st.columns([4, 6])
-
-    # ── Columna izquierda: historial + buscador ────────────────────────────────
-    with col_left3:
-        st.markdown("#### 🎧 Últimas escuchadas")
-
-        if last_songs.empty:
-            st.info("Aún no has escuchado ninguna canción. Busca y añade una abajo.")
-        else:
-            for i, (_, row) in enumerate(last_songs.iterrows()):
-                peso_label  = "⭐ **ÚLTIMA** · Peso 1.5×" if i == 0 else "☆ Peso 1.0×"
-                genre_icon  = GENRE_COLORS.get(row.get("macro_genre", ""), "⚪")
-                st.markdown(
-                    f"**{i+1}. {row['track_name']}**  \n"
-                    f"{row['artists']} · {genre_icon} {row.get('macro_genre', '—')}  \n"
-                    f"{peso_label}"
-                )
-                c1, c2 = st.columns(2)
-                c1.progress(float(row.get("danceability", 0)),
-                            text=f"Dance {row.get('danceability', 0):.2f}")
-                c2.progress(float(row.get("energy", 0)),
-                            text=f"Energy {row.get('energy', 0):.2f}")
-                st.divider()
-
-        st.markdown("#### ➕ Añadir canción escuchada")
-        search_q = st.text_input("🔍 Buscar por artista o título", key="search3")
-        if search_q:
-            search_res = rec.search_songs(search_q, n_results=8)
-            if search_res.empty:
-                st.warning("No se encontraron resultados.")
-            else:
-                for _, srow in search_res.iterrows():
-                    genre_icon = GENRE_COLORS.get(srow.get("macro_genre", ""), "⚪")
-                    c_name, c_btn = st.columns([5, 2])
-                    c_name.write(
-                        f"**{srow['track_name']}** — {srow['artists']} "
-                        f"({genre_icon} {srow['macro_genre']})"
-                    )
-                    if c_btn.button("+ Añadir", key=f"add3_{srow['track_id']}"):
-                        added = rec.add_song_to_history(username, srow["track_id"])
-                        if added:
-                            st.success(f"✅ Añadida: {srow['track_name']}")
-                            st.rerun()
-                        else:
-                            st.info("Ya era tu última canción.")
-
-    # ── Columna derecha: recomendaciones ──────────────────────────────────────
-    with col_right3:
-        st.markdown("#### ✨ Recomendadas para ti")
-
-        if last_songs.empty:
-            st.info("Añade canciones para recibir recomendaciones personalizadas.")
-        else:
-            st.caption(
-                f"Perfil sonoro → género dominante: **{result['profile_genre']}**"
-            )
-            with st.expander("💡 ¿Cómo funciona esta recomendación?"):
-                st.markdown(
-                    f"Calculamos tu **perfil sonoro** como la media ponderada de tus "
-                    f"últimas {len(last_songs)} canciones. Tu canción más reciente tiene "
-                    f"peso **1.5×** (influye un 50% más que las demás). Luego buscamos "
-                    f"las canciones más similares usando **similitud coseno** sobre 9 "
-                    f"audio features de Spotify, dentro del género dominante "
-                    f"(**{result['profile_genre']}**)."
-                )
-
-            if not recs_main.empty:
-                st.markdown(f"##### Porque te gusta el {result['profile_genre']}")
-                d = recs_main[["track_name", "artists", "popularity", "similarity"]].copy()
-                d["similarity"] = (d["similarity"] * 100).round(1).astype(str) + "%"
-                d.columns = ["Canción", "Artista", "Popularity", "Similitud"]
-                st.dataframe(d, use_container_width=True, hide_index=True)
-
-            if not recs_sec.empty:
-                st.markdown(f"##### Puede que también te guste · {result['secondary_genre']}")
-                d2 = recs_sec[["track_name", "artists", "popularity", "similarity"]].copy()
-                d2["similarity"] = (d2["similarity"] * 100).round(1).astype(str) + "%"
-                d2.columns = ["Canción", "Artista", "Popularity", "Similitud"]
-                st.dataframe(d2, use_container_width=True, hide_index=True)
-
-    # ── Radar chart ───────────────────────────────────────────────────────────
-    if not last_songs.empty:
+        # Estadísticas rápidas
+        if stats["total_songs"] > 0:
+            m1, m2, m3, m4, m5 = st.columns(5)
+            m1.metric("🎵 Canciones", stats["total_songs"])
+            m2.metric("🏷️ Género favorito", stats.get("genero_favorito", "—"))
+            m3.metric("💃 Dance",  f"{stats.get('danceability_media', 0):.2f}")
+            m4.metric("⚡ Energy", f"{stats.get('energy_media', 0):.2f}")
+            m5.metric("😊 Mood",   f"{stats.get('valence_media', 0):.2f}")
         st.divider()
-        st.markdown("#### 📊 Tu perfil sonoro")
 
-        profile_raw    = rec.compute_user_profile_raw(last_songs)
-        features_radar = ["danceability", "energy", "valence",
-                          "acousticness", "speechiness", "instrumentalness"]
-        genre_mean = (
-            df[df["macro_genre"] == result["profile_genre"]][features_radar]
-            .mean().to_dict()
-        )
+        result     = rec.recommend(username)
+        last_songs = result["last_songs"]
+        recs_main  = result["recommendations_main"]
+        recs_sec   = result["recommendations_secondary"]
 
-        fig3 = go.Figure()
-        fig3.add_trace(go.Scatterpolar(
-            r=[profile_raw.get(f, 0) for f in features_radar],
-            theta=features_radar, fill="toself",
-            name=f"Tu perfil ({username})",
-            line_color="#1DB954", fillcolor="rgba(29,185,84,0.2)"
-        ))
-        fig3.add_trace(go.Scatterpolar(
-            r=[genre_mean.get(f, 0) for f in features_radar],
-            theta=features_radar, fill="toself",
-            name=f"Media {result['profile_genre']}",
-            line_color="#FF6B35", fillcolor="rgba(255,107,53,0.15)"
-        ))
-        fig3.update_layout(
-            polar=dict(radialaxis=dict(visible=True, range=[0, 1])),
-            showlegend=True, height=420,
-            title=f"Perfil sonoro vs media del género {result['profile_genre']}"
-        )
-        st.plotly_chart(fig3, use_container_width=True)
-        st.caption(
-            "Verde = tu perfil ponderado (la última canción pesa 1.5×). "
-            "Naranja = media del género dominante. "
-            "La diferencia muestra en qué aspectos tu gusto se desvía del género."
-        )
+        col_left3, col_right3 = st.columns([4, 6])
+
+        # ── Columna izquierda: historial + buscador ───────────────────────────
+        with col_left3:
+            st.markdown("#### 🎧 Últimas escuchadas")
+
+            if last_songs.empty:
+                st.info("Aún no has escuchado ninguna canción. Busca y añade una abajo.")
+            else:
+                for i, (_, row) in enumerate(last_songs.iterrows()):
+                    peso_label = "⭐ **ÚLTIMA** · Peso 1.5×" if i == 0 else "☆ Peso 1.0×"
+                    genre_icon = GENRE_COLORS.get(row.get("macro_genre", ""), "⚪")
+                    st.markdown(
+                        f"**{i+1}. {row['track_name']}**  \n"
+                        f"{row['artists']} · {genre_icon} {row.get('macro_genre', '—')}  \n"
+                        f"{peso_label}"
+                    )
+                    c1, c2 = st.columns(2)
+                    c1.progress(float(row.get("danceability", 0)),
+                                text=f"Dance {row.get('danceability', 0):.2f}")
+                    c2.progress(float(row.get("energy", 0)),
+                                text=f"Energy {row.get('energy', 0):.2f}")
+                    st.divider()
+
+            st.markdown("#### ➕ Añadir canción escuchada")
+            search_q = st.text_input("🔍 Buscar por artista o título", key="search3")
+            if search_q:
+                search_res = rec.search_songs(search_q, n_results=8)
+                if search_res.empty:
+                    st.warning("No se encontraron resultados.")
+                else:
+                    for _, srow in search_res.iterrows():
+                        genre_icon = GENRE_COLORS.get(srow.get("macro_genre", ""), "⚪")
+                        c_name, c_btn = st.columns([5, 2])
+                        c_name.write(
+                            f"**{srow['track_name']}** — {srow['artists']} "
+                            f"({genre_icon} {srow['macro_genre']})"
+                        )
+                        if c_btn.button("+ Añadir", key=f"add3_{srow['track_id']}"):
+                            added = rec.add_song_to_history(username, srow["track_id"])
+                            if added:
+                                st.success(f"✅ Añadida: {srow['track_name']}")
+                                st.rerun()
+                            else:
+                                st.info("Ya era tu última canción.")
+
+        # ── Columna derecha: recomendaciones ──────────────────────────────────
+        with col_right3:
+            st.markdown("#### ✨ Recomendadas para ti")
+
+            if last_songs.empty:
+                st.info("Añade canciones para recibir recomendaciones personalizadas.")
+            else:
+                st.caption(
+                    f"Perfil sonoro → género dominante: **{result['profile_genre']}**"
+                )
+                with st.expander("💡 ¿Cómo funciona esta recomendación?"):
+                    st.markdown(
+                        f"Calculamos tu **perfil sonoro** como la media ponderada de tus "
+                        f"últimas {len(last_songs)} canciones. Tu canción más reciente tiene "
+                        f"peso **1.5×** (influye un 50% más que las demás). Luego buscamos "
+                        f"las canciones más similares usando **similitud coseno** sobre 9 "
+                        f"audio features de Spotify, dentro del género dominante "
+                        f"(**{result['profile_genre']}**)."
+                    )
+
+                if not recs_main.empty:
+                    st.markdown(f"##### Porque te gusta el {result['profile_genre']}")
+                    d = recs_main[["track_name", "artists", "popularity", "similarity"]].copy()
+                    d["similarity"] = (d["similarity"] * 100).round(1).astype(str) + "%"
+                    d.columns = ["Canción", "Artista", "Popularity", "Similitud"]
+                    st.dataframe(d, use_container_width=True, hide_index=True)
+
+                if not recs_sec.empty:
+                    st.markdown(f"##### Puede que también te guste · {result['secondary_genre']}")
+                    d2 = recs_sec[["track_name", "artists", "popularity", "similarity"]].copy()
+                    d2["similarity"] = (d2["similarity"] * 100).round(1).astype(str) + "%"
+                    d2.columns = ["Canción", "Artista", "Popularity", "Similitud"]
+                    st.dataframe(d2, use_container_width=True, hide_index=True)
+
+        # ── Radar chart ───────────────────────────────────────────────────────
+        if not last_songs.empty:
+            st.divider()
+            st.markdown("#### 📊 Tu perfil sonoro")
+
+            profile_raw    = rec.compute_user_profile_raw(last_songs)
+            features_radar = ["danceability", "energy", "valence",
+                              "acousticness", "speechiness", "instrumentalness"]
+            genre_mean = (
+                df[df["macro_genre"] == result["profile_genre"]][features_radar]
+                .mean().to_dict()
+            )
+
+            fig3 = go.Figure()
+            fig3.add_trace(go.Scatterpolar(
+                r=[profile_raw.get(f, 0) for f in features_radar],
+                theta=features_radar, fill="toself",
+                name=f"Tu perfil ({username})",
+                line_color="#1DB954", fillcolor="rgba(29,185,84,0.2)"
+            ))
+            fig3.add_trace(go.Scatterpolar(
+                r=[genre_mean.get(f, 0) for f in features_radar],
+                theta=features_radar, fill="toself",
+                name=f"Media {result['profile_genre']}",
+                line_color="#FF6B35", fillcolor="rgba(255,107,53,0.15)"
+            ))
+            fig3.update_layout(
+                polar=dict(radialaxis=dict(visible=True, range=[0, 1])),
+                showlegend=True, height=420,
+                title=f"Perfil sonoro vs media del género {result['profile_genre']}"
+            )
+            st.plotly_chart(fig3, use_container_width=True)
+            st.caption(
+                "Verde = tu perfil ponderado (la última canción pesa 1.5×). "
+                "Naranja = media del género dominante. "
+                "La diferencia muestra en qué aspectos tu gusto se desvía del género."
+            )
 
 
 # ── Footer ─────────────────────────────────────────────────────────────────────
