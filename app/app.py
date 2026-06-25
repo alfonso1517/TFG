@@ -221,7 +221,42 @@ st.markdown("""
     h5, h6 { color: #FFFFFF; }
 
     /* Caption / texto secundario */
-    .stCaption, caption { color: #B3B3B3 !important; }
+    .stCaption, caption { color: #FFFFFF !important; }
+
+    /* Header de Streamlit (barra blanca superior) */
+    header[data-testid="stHeader"] {
+        background-color: #121212 !important;
+        border-bottom: 1px solid #282828;
+    }
+    [data-testid="stToolbar"] { display: none; }
+    [data-testid="stDecoration"] { display: none; }
+    .stAppDeployButton { display: none; }
+
+    /* Forzar fondo oscuro en todos los contenedores */
+    [data-testid="stAppViewContainer"] { background-color: #121212; }
+    [data-testid="stMain"] { background-color: #121212; }
+    .main .block-container { background-color: #121212; }
+
+    /* Labels de inputs, sliders y selectbox en blanco */
+    .stTextInput label,
+    .stSelectbox label,
+    .stSlider label,
+    .stNumberInput label { color: #FFFFFF !important; }
+
+    /* Labels de metricas en gris claro legible */
+    [data-testid="metric-container"] label {
+        color: #CCCCCC !important;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+    }
+
+    /* Texto en sidebar: descripciones en blanco */
+    section[data-testid="stSidebar"] .stMarkdown,
+    section[data-testid="stSidebar"] label,
+    section[data-testid="stSidebar"] p {
+        color: #FFFFFF !important;
+    }
 
     /* Footer de Streamlit */
     footer { visibility: hidden; }
@@ -353,6 +388,20 @@ with st.sidebar:
         unsafe_allow_html=True
     )
 
+
+# ── HERO HEADER ────────────────────────────────────────────────────────────────
+st.markdown(
+    "<div style='padding: 32px 0 20px 0;'>"
+    "<h1 style='color:#FFFFFF; font-size:36px; font-weight:900; "
+    "letter-spacing:-1px; margin:0; line-height:1.1;'>"
+    "Recomendador Musical</h1>"
+    "<p style='color:#B3B3B3; font-size:15px; margin:8px 0 0 0;'>"
+    "Descubre canciones basadas en audio features de Spotify &nbsp;·&nbsp; "
+    f"{len(df):,} canciones en el dataset"
+    "</p>"
+    "</div>",
+    unsafe_allow_html=True
+)
 
 # ── TABS ───────────────────────────────────────────────────────────────────────
 tab1, tab2, tab3 = st.tabs([
