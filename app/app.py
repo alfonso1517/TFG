@@ -22,10 +22,26 @@ from recommendation_system.recommender import PersonalizedRecommender
 
 # ── Rutas de assets ────────────────────────────────────────────────────────────
 ASSETS = Path(__file__).parent / "assets"
+import base64
 
 def asset(name):
     p = ASSETS / name
     return str(p) if p.exists() else None
+
+def show_icon(name, width=44, radius=10, padding=8, bg="#FFFFFF"):
+    """Muestra una imagen de assets dentro de un cuadrado blanco (para iconos oscuros)."""
+    p = ASSETS / name
+    if not p.exists():
+        return
+    with open(p, "rb") as f:
+        data = base64.b64encode(f.read()).decode()
+    ext = p.suffix.lstrip(".")
+    st.markdown(
+        f'<div style="display:inline-block; background:{bg}; '
+        f'padding:{padding}px; border-radius:{radius}px; line-height:0;">'
+        f'<img src="data:image/{ext};base64,{data}" width="{width}"></div>',
+        unsafe_allow_html=True
+    )
 
 # ── Configuracion ──────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -302,9 +318,7 @@ def knn_by_profile(profile_vec: list, n: int = 10, genre_filter: str = "Todos") 
 
 # ── SIDEBAR ────────────────────────────────────────────────────────────────────
 with st.sidebar:
-    logo = asset("spotify_logo.png")
-    if logo:
-        st.image(logo, width=48)
+    show_icon("spotify_logo.png", width=48, radius=12, padding=6)
 
     st.markdown(
         "<h2 style='color:#FFFFFF; margin-top:8px; margin-bottom:2px;'>"
@@ -352,13 +366,10 @@ tab1, tab2, tab3 = st.tabs([
 # TAB 1 — Por cancion semilla
 # ══════════════════════════════════════════════════════════════════════════════
 with tab1:
-    icon1 = asset("music_note.png")
-    if icon1:
-        c_ico, c_ttl = st.columns([1, 14])
-        c_ico.image(icon1, width=40)
-        c_ttl.markdown("### Canciones similares a la que elijas")
-    else:
-        st.markdown("### Canciones similares a la que elijas")
+    c_ico, c_ttl = st.columns([1, 14])
+    with c_ico:
+        show_icon("music_note.png", width=40)
+    c_ttl.markdown("### Canciones similares a la que elijas")
 
     st.markdown(
         "<p style='color:#B3B3B3;'>Busca una cancion, seleccionala y obtén recomendaciones "
@@ -423,13 +434,10 @@ with tab1:
 # TAB 2 — Por preferencias
 # ══════════════════════════════════════════════════════════════════════════════
 with tab2:
-    icon2 = asset("vinyl.png")
-    if icon2:
-        c_ico2, c_ttl2 = st.columns([1, 14])
-        c_ico2.image(icon2, width=40)
-        c_ttl2.markdown("### Define tu perfil musical")
-    else:
-        st.markdown("### Define tu perfil musical")
+    c_ico2, c_ttl2 = st.columns([1, 14])
+    with c_ico2:
+        show_icon("vinyl.png", width=40)
+    c_ttl2.markdown("### Define tu perfil musical")
 
     st.markdown(
         "<p style='color:#B3B3B3;'>Ajusta las caracteristicas de audio de tu cancion ideal "
@@ -531,13 +539,10 @@ with tab2:
 # TAB 3 — Mi perfil de usuario
 # ══════════════════════════════════════════════════════════════════════════════
 with tab3:
-    icon3 = asset("user_icon.png")
-    if icon3:
-        c_ico3, c_ttl3 = st.columns([1, 14])
-        c_ico3.image(icon3, width=36)
-        c_ttl3.markdown("### Tu perfil musical personalizado")
-    else:
-        st.markdown("### Tu perfil musical personalizado")
+    c_ico3, c_ttl3 = st.columns([1, 14])
+    with c_ico3:
+        show_icon("user_icon.png", width=36)
+    c_ttl3.markdown("### Tu perfil musical personalizado")
 
     st.markdown(
         "<p style='color:#B3B3B3;'>El sistema aprende de las canciones que escuchas "
