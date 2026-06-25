@@ -53,29 +53,43 @@ st.set_page_config(
 # ── Tema Spotify ───────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-    /* Fondo y tipografia general */
-    .stApp {
+    /* ── Barra superior personalizada ─────────────────────────────────────── */
+    header[data-testid="stHeader"] {
+        background-color: #000000 !important;
+        border-bottom: 1px solid #282828 !important;
+    }
+    header[data-testid="stHeader"]::before {
+        content: "Herramienta Spotify  ·  TFG Roberto González Lozano";
+        display: block;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #FFFFFF;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+    }
+    [data-testid="stToolbar"]      { display: none !important; }
+    [data-testid="stDecoration"]   { display: none !important; }
+    .stAppDeployButton             { display: none !important; }
+
+    /* ── Fondos ────────────────────────────────────────────────────────────── */
+    .stApp,
+    [data-testid="stAppViewContainer"],
+    [data-testid="stMain"],
+    .main .block-container {
         background-color: #121212;
         color: #FFFFFF;
         font-family: 'Circular', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     }
 
-    /* Sidebar */
-    section[data-testid="stSidebar"] {
-        background-color: #000000;
-    }
-    section[data-testid="stSidebar"] .stMarkdown,
-    section[data-testid="stSidebar"] label,
-    section[data-testid="stSidebar"] p {
-        color: #B3B3B3;
-    }
-    section[data-testid="stSidebar"] h1,
-    section[data-testid="stSidebar"] h2,
-    section[data-testid="stSidebar"] h3 {
-        color: #FFFFFF;
-    }
+    /* ── Sidebar ────────────────────────────────────────────────────────────── */
+    section[data-testid="stSidebar"] { background-color: #000000; }
+    section[data-testid="stSidebar"] * { color: #FFFFFF !important; }
 
-    /* Tabs */
+    /* ── Tabs ───────────────────────────────────────────────────────────────── */
     .stTabs [data-baseweb="tab-list"] {
         background-color: #121212;
         border-bottom: 1px solid #282828;
@@ -91,21 +105,14 @@ st.markdown("""
         padding: 14px 24px;
         border-radius: 0;
     }
-    .stTabs [data-baseweb="tab"]:hover {
-        color: #FFFFFF;
-        background-color: #1a1a1a;
-    }
-    .stTabs [aria-selected="true"] {
-        color: #FFFFFF;
-        border-bottom: 2px solid #1DB954;
-        background-color: transparent;
-    }
+    .stTabs [data-baseweb="tab"]:hover   { color: #FFFFFF; background-color: #1a1a1a; }
+    .stTabs [aria-selected="true"]       { color: #FFFFFF; border-bottom: 2px solid #1DB954; }
 
-    /* Botones primarios */
+    /* ── Botones ────────────────────────────────────────────────────────────── */
     .stButton > button {
-        background-color: #1DB954;
-        color: #000000;
-        border: none;
+        background-color: #1DB954 !important;
+        color: #000000 !important;
+        border: none !important;
         border-radius: 500px;
         font-weight: 700;
         font-size: 13px;
@@ -114,45 +121,38 @@ st.markdown("""
         padding: 11px 32px;
         transition: all 0.15s ease;
     }
-    .stButton > button:hover {
-        background-color: #1ed760;
-        color: #000000;
-        border: none;
-        transform: scale(1.02);
-    }
-    .stButton > button:active {
-        background-color: #169c46;
-    }
+    .stButton > button:hover  { background-color: #1ed760 !important; transform: scale(1.02); }
+    .stButton > button:active { background-color: #169c46 !important; }
 
-    /* Inputs de texto */
+    /* ── Inputs ─────────────────────────────────────────────────────────────── */
     .stTextInput > div > div > input {
-        background-color: #282828;
-        color: #FFFFFF;
-        border: 1px solid #404040;
+        background-color: #282828 !important;
+        color: #FFFFFF !important;
+        border: 1px solid #404040 !important;
         border-radius: 4px;
     }
     .stTextInput > div > div > input:focus {
-        border-color: #1DB954;
-        box-shadow: 0 0 0 1px #1DB954;
+        border-color: #1DB954 !important;
+        box-shadow: 0 0 0 1px #1DB954 !important;
     }
-    .stTextInput label { color: #B3B3B3 !important; }
+    .stTextInput label,
+    .stSelectbox label,
+    .stSlider label,
+    .stNumberInput label,
+    .stMultiSelect label { color: #FFFFFF !important; }
 
-    /* Selectbox */
+    /* ── Selectbox ──────────────────────────────────────────────────────────── */
     .stSelectbox > div > div {
-        background-color: #282828;
-        border: 1px solid #404040;
+        background-color: #282828 !important;
+        border: 1px solid #404040 !important;
+        color: #FFFFFF !important;
         border-radius: 4px;
-        color: #FFFFFF;
     }
-    .stSelectbox label { color: #B3B3B3 !important; }
 
-    /* Sliders */
-    .stSlider > div > div > div > div {
-        background-color: #1DB954 !important;
-    }
-    .stSlider label { color: #B3B3B3 !important; }
+    /* ── Sliders ────────────────────────────────────────────────────────────── */
+    .stSlider > div > div > div > div { background-color: #1DB954 !important; }
 
-    /* Metricas */
+    /* ── Metricas ───────────────────────────────────────────────────────────── */
     [data-testid="metric-container"] {
         background-color: #282828;
         border-radius: 8px;
@@ -160,81 +160,50 @@ st.markdown("""
         border: 1px solid #333333;
     }
     [data-testid="metric-container"] label {
-        color: #B3B3B3 !important;
-        font-size: 12px;
+        color: #FFFFFF !important;
+        font-size: 11px;
         text-transform: uppercase;
         letter-spacing: 0.8px;
     }
-    [data-testid="stMetricValue"] {
-        color: #FFFFFF !important;
-        font-weight: 700;
-    }
+    [data-testid="stMetricValue"] { color: #FFFFFF !important; font-weight: 700; }
 
-    /* Barras de progreso */
-    .stProgress > div > div > div {
-        background-color: #282828;
-        border-radius: 4px;
-    }
-    .stProgress > div > div > div > div {
-        background-color: #1DB954 !important;
-        border-radius: 4px;
-    }
+    /* ── Barras de progreso ─────────────────────────────────────────────────── */
+    .stProgress > div > div > div         { background-color: #282828; border-radius: 4px; }
+    .stProgress > div > div > div > div   { background-color: #1DB954 !important; border-radius: 4px; }
+    /* texto de la barra */
+    .stProgress p { color: #FFFFFF !important; }
 
-    /* Dataframes */
-    .stDataFrame {
-        background-color: #282828;
-        border-radius: 8px;
-    }
+    /* ── Dataframes ─────────────────────────────────────────────────────────── */
+    .stDataFrame { background-color: #282828; border-radius: 8px; }
     .stDataFrame th {
         background-color: #1a1a1a !important;
-        color: #B3B3B3 !important;
+        color: #FFFFFF !important;
         font-size: 11px;
         letter-spacing: 1px;
         text-transform: uppercase;
     }
     .stDataFrame td { color: #FFFFFF !important; }
 
-    /* Expander */
-    .streamlit-expanderHeader {
-        background-color: #282828;
-        border-radius: 6px;
-        color: #B3B3B3 !important;
-    }
-    .streamlit-expanderContent {
-        background-color: #1e1e1e;
-        border-radius: 0 0 6px 6px;
-    }
+    /* ── Expander ───────────────────────────────────────────────────────────── */
+    .streamlit-expanderHeader          { background-color: #282828; border-radius: 6px; color: #FFFFFF !important; }
+    .streamlit-expanderContent         { background-color: #1e1e1e; border-radius: 0 0 6px 6px; }
 
-    /* Alertas / info */
-    .stAlert {
-        background-color: #282828;
-        border-radius: 8px;
-        border-left: 4px solid #1DB954;
-    }
+    /* ── Alertas ────────────────────────────────────────────────────────────── */
+    .stAlert { background-color: #282828; border-radius: 8px; border-left: 4px solid #1DB954; }
+    .stAlert p, .stAlert div { color: #FFFFFF !important; }
 
-    /* Divisores */
-    hr { border-color: #282828 !important; }
+    /* ── Markdown general ───────────────────────────────────────────────────── */
+    [data-testid="stMarkdownContainer"] p,
+    [data-testid="stMarkdownContainer"] li,
+    [data-testid="stMarkdownContainer"] span { color: #FFFFFF !important; }
 
-    /* Titulos */
-    h1 { color: #FFFFFF; font-weight: 900; letter-spacing: -1px; }
-    h2, h3, h4 { color: #FFFFFF; font-weight: 700; }
-    h5, h6 { color: #FFFFFF; }
-
-    /* Caption / texto secundario */
-    .stCaption, caption { color: #FFFFFF !important; }
-
-    /* Header de Streamlit (barra blanca superior) */
-    header[data-testid="stHeader"] {
-        background-color: #121212 !important;
-        border-bottom: 1px solid #282828;
-    }
-    [data-testid="stToolbar"] { display: none; }
-    [data-testid="stDecoration"] { display: none; }
-    .stAppDeployButton { display: none; }
-
-    /* Forzar fondo oscuro en todos los contenedores */
-    [data-testid="stAppViewContainer"] { background-color: #121212; }
-    [data-testid="stMain"] { background-color: #121212; }
+    /* ── Misc ───────────────────────────────────────────────────────────────── */
+    hr                    { border-color: #282828 !important; }
+    h1                    { color: #FFFFFF; font-weight: 900; letter-spacing: -1px; }
+    h2, h3, h4, h5, h6   { color: #FFFFFF; font-weight: 700; }
+    .stCaption, caption   { color: #FFFFFF !important; }
+    footer                { visibility: hidden; }
+    #MainMenu             { visibility: hidden; }
     .main .block-container { background-color: #121212; }
 
     /* Labels de inputs, sliders y selectbox en blanco */
